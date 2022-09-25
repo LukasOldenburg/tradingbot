@@ -6,19 +6,11 @@ import numpy as np
 
 matplotlib.rcParams['backend'] = 'TkAgg'
 
-start_date = '2019-09-24-00-00'
-end_date = '2019-10-01-00-00'
+start_date = '2019-09-01-00-00'
+end_date = '2019-09-30-00-00'
 
-def raw_data():
-    list = pd.DataFrame(HistoricalData('BTC-USD', 60, start_date, end_date).retrieve_data())
-    del list['low']
-    del list['high']
-    del list['close']
-    del list['volume']
-    return list
-
-def get_data(len_window):
-    list = pd.DataFrame(HistoricalData('BTC-USD', 60, start_date, end_date).retrieve_data())
+def get_data(len_window, freq):
+    list = pd.DataFrame(HistoricalData('BTC-USD', freq, start_date, end_date).retrieve_data())
     del list['low']
     del list['high']
     del list['close']
@@ -27,12 +19,6 @@ def get_data(len_window):
     list['abs_avrg'] = list['open'].mean()
     return list
 
-def extract_window_length(hours, data):
-    delta = data.index.max() - data.index.min()
-    total_sec_data = delta.total_seconds()
-    total_sec_hour = hours*60*60
-    steps = len(data)/(total_sec_data/total_sec_hour)
-    return int(steps), total_sec_data
 
 def find_first_buy(data, bandwidth, len_window):
     first_buy = None
@@ -61,37 +47,44 @@ def check_buy(open, avg, sell_val, bandwidth):
 
 # --- define parameters ---
 invested_money = 1000
+freq = 60 # data frequency in seconds
 cost_per_trade = 1
-perc_band = 1.0 # in %
-hours_window = 12 # in hours
-spread = 0.3 # spread in % (Differenz zwischen Kauf und Verkaufskurs)
+perc_band = 0.5 # in %
+hours_window = 2 # in hours
+spread = 0.1 # spread in % (Differenz zwischen Kauf und Verkaufskurs)
 avrg_type = 'mov_avrg'# mov_avrg or abs_avrg
 save_output = False
 # -------------------------
 
 buy_val_list = []
+buy_time_list = []
 sell_val_list = []
+sell_time_list = []
 buy_val = None
 sell_val = None
 
-raw_data = raw_data()
-len_window, time_delta = extract_window_length(hours=hours_window, data=raw_data)
-data = get_data(len_window=len_window)
+# len_window, time_delta = extract_window_length(hours=hours_window, data=raw_data)
+len_window = int(3600*hours_window/freq)
+data = get_data(len_window=len_window, freq=freq)
 
+# todo: implement trailing stop for buy and sell orders
 bandwidth = calc_bandwidth(percentage=perc_band, init_avg=data[avrg_type][len_window])
 init_buy, buy_index = find_first_buy(data=data, bandwidth=bandwidth, len_window=len_window)
 buy_val_list.append(init_buy + 0.5*spread*0.01*init_buy)
+buy_time_list.append(data.axes[0][buy_index])
 sell_flag = False
 for i in range(buy_index, len(data)):
     sell_val = check_sell(open=data['open'][i], avg=data[avrg_type][i], buy_val=buy_val_list[-1], bandwidth=bandwidth)
     if sell_val is not None and sell_flag == False:
         sell_val_list.append(sell_val - 0.5*spread*0.01*sell_val) # correct values with spread
+        sell_time_list.append(data.axes[0][i])
         sell_flag = True
     if sell_val_list:
         buy_val = check_buy(open=data['open'][i], avg=data[avrg_type][i], sell_val=sell_val_list[-1],
                             bandwidth=bandwidth)
     if buy_val is not None and sell_flag:
         buy_val_list.append(buy_val + 0.5*spread*0.01*buy_val)
+        buy_time_list.append(data.axes[0][i])
         sell_flag = False
 
 num_trades = len(buy_val_list) + len(sell_val_list)
@@ -102,6 +95,8 @@ win_trade_perc = np.sum(win_trade_abs/sell_val_list)*100
 abs_profit = invested_money*win_trade_perc*0.01 - num_trades*cost_per_trade
 
 if save_output:
+    delta = data.index.max() - data.index.min()
+    time_delta = delta.total_seconds()
     file = open("Out-{}to{}.txt".format(start_date, end_date), "w")
     file.write('date: {} to {} \n absolute time [hours]: {} \n num_trades: {} \n win_trade_perc [without order cost]: {} \n invested_money: {}'
                ' \n abs_profit:{} \n \n \n perc_band: {} \n hours_window: {} \n spread: {} \n avrg_type: {}'
@@ -111,4 +106,6 @@ if save_output:
     plt.plot(data['open'], marker='o')
     plt.plot(data['mov_avrg'], marker='x')
     plt.plot(data['abs_avrg'], marker='x')
+    plt.plot(buy_time_list, buy_val_list, marker='x', markersize=20, markeredgecolor='r', linestyle='None')
+    plt.plot(sell_time_list, sell_val_list, marker='x', markersize=20, markeredgecolor='g', linestyle='None')
     plt.savefig('Fig-{}to{}'.format(start_date, end_date))
