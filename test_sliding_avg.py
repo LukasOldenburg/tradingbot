@@ -66,6 +66,7 @@ perc_band = 1.0 # in %
 hours_window = 12 # in hours
 spread = 0.3 # spread in % (Differenz zwischen Kauf und Verkaufskurs)
 avrg_type = 'mov_avrg'# mov_avrg or abs_avrg
+save_output = False
 # -------------------------
 
 buy_val_list = []
@@ -100,13 +101,14 @@ win_trade_abs = sell_val_list - buy_val_list[0:len(sell_val_list)]
 win_trade_perc = np.sum(win_trade_abs/sell_val_list)*100
 abs_profit = invested_money*win_trade_perc*0.01 - num_trades*cost_per_trade
 
-file = open("Out-{}to{}.txt".format(start_date, end_date), "w")
-file.write('date: {} to {} \n absolute time [hours]: {} \n num_trades: {} \n win_trade_perc [without order cost]: {} \n invested_money: {}'
-           ' \n abs_profit:{} \n \n \n perc_band: {} \n hours_window: {} \n spread: {} \n avrg_type: {}'
-           .format(start_date, end_date, time_delta/60**2, num_trades, win_trade_perc, invested_money, abs_profit,
-                   perc_band, hours_window, spread, avrg_type))
-file.close()
-plt.plot(data['open'], marker='o')
-plt.plot(data['mov_avrg'], marker='x')
-plt.plot(data['abs_avrg'], marker='x')
-plt.savefig('Fig-{}to{}'.format(start_date, end_date))
+if save_output:
+    file = open("Out-{}to{}.txt".format(start_date, end_date), "w")
+    file.write('date: {} to {} \n absolute time [hours]: {} \n num_trades: {} \n win_trade_perc [without order cost]: {} \n invested_money: {}'
+               ' \n abs_profit:{} \n \n \n perc_band: {} \n hours_window: {} \n spread: {} \n avrg_type: {}'
+               .format(start_date, end_date, time_delta/60**2, num_trades, win_trade_perc, invested_money, abs_profit,
+                       perc_band, hours_window, spread, avrg_type))
+    file.close()
+    plt.plot(data['open'], marker='o')
+    plt.plot(data['mov_avrg'], marker='x')
+    plt.plot(data['abs_avrg'], marker='x')
+    plt.savefig('Fig-{}to{}'.format(start_date, end_date))
