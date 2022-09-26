@@ -1,16 +1,22 @@
 import pandas as pd
-from pandas_datareader import data
+import yfinance as yf
+
 
 # todo get data returns only timestamps and values and used avg
-def get_data(len_window, freq):
-    list = pd.DataFrame(HistoricalData('BTC-USD', freq, start_date, end_date).retrieve_data())
-    del list['low']
-    del list['high']
-    del list['close']
-    del list['volume']
-    list['mov_avrg'] = list['open'].rolling(len_window).mean()
-    list['abs_avrg'] = list['open'].mean()
-    return list
+def get_data(stock_name: str) -> str:
+    """
+    desc
+
+    :param stock_name: description
+    :return:
+    :rtype: str
+    """
+    stock = 's'
+    return stock
+
+
+A = get_data
+B = 1
 
 
 def find_first_buy(data, bandwidth, len_window):
