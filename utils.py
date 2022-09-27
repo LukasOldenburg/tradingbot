@@ -1,6 +1,7 @@
 import pandas as pd
 import yfinance as yf
 
+#ssh test
 
 # todo get data returns only timestamps and values and used avg
 def get_data(stock_name: str) -> str:
