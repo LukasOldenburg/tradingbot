@@ -6,11 +6,11 @@ import numpy as np
 
 matplotlib.rcParams['backend'] = 'TkAgg'
 
-start_date = '2019-09-01-00-00'
-end_date = '2019-09-30-00-00'
+start_date = '2019-01-09-00-00'
+end_date = '2019-01-10-00-00'
 
 def get_data(len_window, freq):
-    list = pd.DataFrame(HistoricalData('BTC-USD', freq, start_date, end_date).retrieve_data())
+    list = pd.DataFrame(HistoricalData('ETH-USD', freq, start_date, end_date).retrieve_data())
     del list['low']
     del list['high']
     del list['close']
@@ -36,24 +36,24 @@ def calc_bandwidth(percentage, init_avg):
 
 
 def check_sell(open, avg, buy_val, bandwidth):
-    if (open > buy_val + bandwidth) and (open > avg + bandwidth):
+    if (open > (buy_val + bandwidth)) and (open > (avg + bandwidth)):
         return open
 
 
 def check_buy(open, avg, sell_val, bandwidth):
-    if (open < sell_val + bandwidth) and (open < avg - bandwidth):
+    if open < (avg - bandwidth):
         return open
-
+                                                                     
 
 # --- define parameters ---
 invested_money = 1000
 freq = 60 # data frequency in seconds
 cost_per_trade = 1
-perc_band = 0.5 # in %
-hours_window = 2 # in hours
+perc_band = 1.0 # in %
+hours_window = 10 # in hours
 spread = 0.1 # spread in % (Differenz zwischen Kauf und Verkaufskurs)
 avrg_type = 'mov_avrg'# mov_avrg or abs_avrg
-save_output = False
+save_output = True
 # -------------------------
 
 buy_val_list = []
@@ -106,6 +106,7 @@ if save_output:
     plt.plot(data['open'], marker='o')
     plt.plot(data['mov_avrg'], marker='x')
     plt.plot(data['abs_avrg'], marker='x')
-    plt.plot(buy_time_list, buy_val_list, marker='x', markersize=20, markeredgecolor='r', linestyle='None')
-    plt.plot(sell_time_list, sell_val_list, marker='x', markersize=20, markeredgecolor='g', linestyle='None')
-    plt.savefig('Fig-{}to{}'.format(start_date, end_date))
+    plt.plot(buy_time_list, buy_val_list, marker='.', markersize=40, markerfacecolor='red', linestyle='None')
+    plt.plot(sell_time_list, sell_val_list, marker='.', markersize=40, markerfacecolor='green', linestyle='None')
+    plt.savefig('Fig-{}to{}.svg'.format(start_date, end_date), format='svg')
+
