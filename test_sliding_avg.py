@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import utils
 
 matplotlib.rcParams['backend'] = 'TkAgg'
 
@@ -33,7 +32,7 @@ sell_val = None
 
 # len_window, time_delta = extract_window_length(hours=hours_window, data=raw_data)
 len_window = int(3600 * hours_window / freq)
-data = utils.get_data(len_window=len_window, freq=freq)
+data = utils.get_test_data(len_window=len_window, freq=freq)
 
 bandwidth = utils.calc_bandwidth(percentage=perc_band, init_avg=data[avrg_type][len_window])
 init_buy, buy_index = utils.find_first_buy(data=data, bandwidth=bandwidth, len_window=len_window)
