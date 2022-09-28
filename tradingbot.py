@@ -1,23 +1,13 @@
 import strategies
-import utils
+import yfinance as yf
 
 
 class TradingBot:
-    """
-    The class TestStrategy tests a specified strategy with historical stock data.
-
-    Parameters
-    ----------
-    :param strategy_name
-
-    """
-
-    # todo finish docstring
 
     def __init__(self, config):
 
         self.config = config
-        self.strategy_name = config['strategy_name']
+        self.tradingbot_category = config['tradingbot_category']
         self.stock_name = config['stock_name']
         self.start_date = config['start_date']
         self.end_date = config['end_date']
@@ -26,26 +16,26 @@ class TradingBot:
         self.data = None
         self.window_len_points = None
         self.strategy = None
-        self.buy_values = None
-        self.sell_values = None
 
     def test(self):
         # get test stock data and extract necessary information during preprocessing
-        self.data = utils.get_test_data(stock_name=self.stock_name, start_date=self.start_date, end_date=self.end_date,
-                                        frequency=self.frequency)
+        self.data = self.get_test_data()
         self.data, self.window_len_points = self.preprocess_test_data(self.data, self.window_len)
 
         # select strategy type
-        if self.strategy_name == 'adapted_mean':
-            self.strategy = strategies.TestMovingAverage(data=self.data, len_window_points=self.window_len_points,
-                                                         config=self.config)
+        if self.tradingbot_category == 'mean':
+            self.strategy = strategies.TestMovingAverage(data=self.data, config=self.config,
+                                                         len_window_points=self.window_len_points)
 
         else:
-            raise Exception('No strategy found with name {}'.format(self.strategy_name))
+            raise Exception('No strategy found with name {}'.format(self.tradingbot_category))
 
-        self.buy_values, self.sell_values = self.strategy.trade()
+        # start trading
+        self.strategy.trade()
 
-        return self.buy_values, self.sell_values, self.data
+        # evaluate, plot and save results
+        self.strategy.evaluate()
+        self.strategy.plot_results()
 
     def preprocess_test_data(self, data, window_len):
         if self.frequency == '1m':
@@ -57,3 +47,7 @@ class TradingBot:
         data['moving_mean'] = data['Open'].rolling(length).mean()
         data['absolut_mean'] = data['Open'].mean()
         return data, length
+
+    def get_test_data(self):
+        data = yf.download(tickers=self.stock_name, start=self.start_date, end=self.end_date, interval=self.frequency)
+        return data
