@@ -5,7 +5,11 @@ import matplotlib.pyplot as plt
 
 class TestStrategy:
 
-    def __init__(self, data, config, len_window_points):
+    """
+    This is a parent class for all strategies
+    """
+
+    def __init__(self, data, config):
         self.data = data
         self.invested_money = config['invested_money']
         self.tradingbot_name = config['tradingbot_name']
@@ -33,9 +37,11 @@ class TestStrategy:
         self.num_trades = np.size(buy_val) + np.size(sell_val)
 
         # calculate wins deducted by trading costs
+        # todo check if conditions here. only if buy_val bigger than sell_val
         if self.cost_trade_measure == 'perc' and sell_val.size != 0:
             self.trade_wins_perc = (sell_val / buy_val[0:np.size(sell_val)] - 1) - self.cost_trade * 0.01
         elif self.cost_trade_measure == 'abs' and sell_val.size != 0:
+            #todo check if this is valid
             self.trade_wins_perc = (sell_val / (buy_val[0:np.size(sell_val)] + self.cost_trade * 0.01 * sell_val)) - 1
         else:
             raise ValueError('Bot was not able to find a point to sell.')
@@ -57,8 +63,12 @@ class TestStrategy:
 
 class TestMovingAverage(TestStrategy):
 
+    """
+    This class defines a moving average approach with a performance band to evaluate trading decisions
+    """
+
     def __init__(self, config, data, len_window_points):
-        super().__init__(data, config, len_window_points)
+        super().__init__(data, config)
         self.average_type = config['average_type']
         self.band_percentage = config['band_percentage']
         self.len_window_points = len_window_points

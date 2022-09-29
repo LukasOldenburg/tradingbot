@@ -4,6 +4,10 @@ import yfinance as yf
 
 class TradingBot:
 
+    """
+    This class can test a Trading Bot with a specified trading strategy
+    """
+
     def __init__(self, config):
 
         self.config = config
