@@ -2,8 +2,6 @@ import yaml
 from tradingbot import TradingBot
 import matplotlib
 
-#todo validate if computations are correct
-
 matplotlib.rcParams['backend'] = 'TkAgg'
 
 file_name = 'config.yaml'

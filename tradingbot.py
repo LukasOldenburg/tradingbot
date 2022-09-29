@@ -30,7 +30,6 @@ class TradingBot:
         if self.tradingbot_category == 'mean':
             self.strategy = strategies.TestMovingAverage(data=self.data, config=self.config,
                                                          len_window_points=self.window_len_points)
-
         else:
             raise Exception('No strategy found with name {}'.format(self.tradingbot_category))
 
@@ -39,7 +38,7 @@ class TradingBot:
 
         # evaluate, plot and save results
         self.strategy.evaluate()
-        self.strategy.plot_results()
+        self.strategy.save_results()
 
     def preprocess_test_data(self, data, window_len):
         if self.frequency == '1m':

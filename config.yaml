@@ -1,29 +1,28 @@
 tradingbot_name: 'moving_mean_1'
 tradingbot_category: 'mean' # 'mean'
-save_results: True
+save_outcome: True
 
 # ------------------------ data settings ------------------------------
 stock_name: 'DTE.DE' # [string] search for indicators at https://finance.yahoo.com/
-start_date: '2022-09-05' # [string] format yyyy-mm-dd
-end_date: '2022-09-12' # [string] format yyyy-mm-dd
-frequency: '1m' # [string] 1d (daily) or 1m (minutely), minute data only available for 7 days
-window_len: 1 # [integer] window length in hours or days for sliding window calculation (depends on frequency value)
+start_date: '2020-05-01' # [string] format yyyy-mm-dd
+end_date: '2022-05-01' # [string] format yyyy-mm-dd
+frequency: '1d' # [string] 1d (daily) or 1m (minutely), minute data only available for 7 days
+window_len: 5 # [integer] window length in hours or days for sliding window calculation (depends on frequency value)
 # ---------------------------------------------------------------------
 
 
 # ------------------------ market settings ------------------------------
 invested_money: 1000.0 # [float] initial invested money in currency of stock_name
-spread: 0.0 # [float] assumed spread during trade in [%]
+spread: 0.03 # [float] assumed spread during trade in [%] - spread for high frequent ETF ~ 0.017%
 
 # only one of these values can be considered (other must be empty)
-cost_trade_abs:  # [float or empty] absolute cost per trade (currency used in stock_name)
-cost_trade_perc: 0.0  # [float or empty] cost per trade in percentage of trading volume
+cost_trade_abs:  # [float or empty] absolute cost per trade (currency used in stock_name, assumed all money is invested per trade)
+cost_trade_perc: 0.5  # [float or empty] cost per trade in percentage of trading volume
 # ------------------------------------------------------------------------
 
 
 # ------------------------ algorithm settings ------------------------------
 # Only for strategy_name: 'adapted_mean'
 average_type: 'moving_mean' # [string] 'moving_mean', 'absolut_mean'
-band_percentage: 0.5 # [float] percentage band of mean strategy
-
+desired_win: 2.0 # [float] percentage win for one buy-sell trade
 #------------------------------------------------------------------------
