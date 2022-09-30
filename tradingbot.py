@@ -53,4 +53,6 @@ class TradingBot:
 
     def get_test_data(self):
         data = yf.download(tickers=self.stock_name, start=self.start_date, end=self.end_date, interval=self.frequency)
+        if data.empty:
+            raise ValueError('Can not download data.')
         return data

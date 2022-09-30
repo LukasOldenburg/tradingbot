@@ -37,14 +37,14 @@ class TestStrategy:
         real_sell_val = np.squeeze(np.array(self.real_sell_values))
         self.num_trades = np.size(real_buy_val) + np.size(real_sell_val)
         if np.size(real_sell_val) == np.size(real_buy_val):
-            self.strategy_profit = ((np.sum(real_sell_val - real_buy_val) / real_buy_val[-1]) - 1) * 100
+            self.strategy_profit = (np.sum((real_sell_val / real_buy_val) - 1)) * 100
             self.accounting_value = 0.0
         else:
             self.strategy_profit = (np.sum((real_sell_val / real_buy_val[:-1]) - 1)) * 100
+            strategy_profit_per_trade = ((real_sell_val / real_buy_val[:-1]) - 1) * 100
             self.accounting_value = ((self.data['Open'][-1] / real_buy_val[-1]) - 1) * 100
         self.perc_profit_bot = (self.strategy_profit + self.accounting_value)
         self.perc_profit_long = ((self.data['Open'][-1] / real_buy_val[0]) - 1) * 100
-        return self.num_trades
 
     def save_results(self):
         if self.save_results:

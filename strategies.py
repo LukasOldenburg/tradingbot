@@ -14,6 +14,7 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         self.average_type = config['average_type']
         self.desired_win = config['desired_win']
         self.len_window_points = len_window_points
+        # todo debug order cost percentage
         self.order_cost_perc = self.cost_trade if self.cost_trade_measure == 'perc' \
             else self.cost_trade / self.invested_money
         self.band_values = None
@@ -31,7 +32,7 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         for i in range(self.len_window_points - 1, len(self.data)):
             if i >= buy_idx:  # start looking for selling points after first buy
                 if buy_flag:  # last trade was a buy-order
-                    sell_value = self.check_sell(timestep=i, bandwidth=self.band_values[i])
+                    sell_value = self.check_sell(timestep=i, bandwidth=self.band_values[self.buy_values.index[-1]]) # refer to the last buy band value
                     if sell_value is not None:
                         self.sell_values = pd.concat([self.sell_values, sell_value])
                         real_sell = sell_value * (1 - 0.5 * self.spread * 0.01 - self.order_cost_perc * 0.01)
@@ -47,14 +48,14 @@ class TestMovingAverage(strategy_handler.TestStrategy):
 
     def calc_bandwidth(self):
         # no band values before window movement
-        band_values = np.empty(self.len_window_points - 1)
-        band_values.fill(np.nan)
+        band_values = pd.DataFrame([np.nan] * (self.len_window_points - 1))
+        band_values.index = self.data.index[:(self.len_window_points - 1)]
         for k in range(self.len_window_points - 1, len(self.data)):
-            band_value = self.data[self.average_type][k] * 0.01 * (0.5 * self.desired_win
-                                                                   + 0.5 * self.spread
-                                                                   + 0.5 * self.order_cost_perc)
-            band_values = np.append(band_values, band_value)
-        return band_values
+            band_value = pd.DataFrame(self.data[self.average_type][[k]] * 0.01 * (0.5 * self.desired_win
+                                                                                  + 0.5 * self.spread
+                                                                                  + 0.5 * self.order_cost_perc))
+            band_values = pd.concat([band_values, band_value], axis=0)
+        return band_values[self.average_type]
 
     def find_first_buy(self):
         first_buy = None
@@ -67,7 +68,7 @@ class TestMovingAverage(strategy_handler.TestStrategy):
             raise ValueError('Found no first buy point.')
 
     def check_sell(self, timestep, bandwidth):
-        if (self.data['Open'].iloc[[timestep][0]]) > (self.buy_values['Open'].iloc[[-1][0]] + (2 * bandwidth)):
+        if (self.data['Open'].iloc[[timestep][0]]) > (self.real_buy_values['Open'].iloc[[-1][0]] + (2 * bandwidth)):
             return self.data[['Open']].iloc[[timestep]]
         else:
             return None
