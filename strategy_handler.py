@@ -22,6 +22,7 @@ class TestStrategy:
         self.perc_profit_bot = None
         self.accounting_value = None
         self.strategy_profit = None
+        self.strategy_profit_per_trade = None
 
         if config['cost_trade_abs'] is None and isinstance(config['cost_trade_perc'], float):
             self.cost_trade_measure = 'perc'
@@ -38,10 +39,11 @@ class TestStrategy:
         self.num_trades = np.size(real_buy_val) + np.size(real_sell_val)
         if np.size(real_sell_val) == np.size(real_buy_val):
             self.strategy_profit = (np.sum((real_sell_val / real_buy_val) - 1)) * 100
+            self.strategy_profit_per_trade = ((real_sell_val / real_buy_val) - 1) * 100
             self.accounting_value = 0.0
         else:
             self.strategy_profit = (np.sum((real_sell_val / real_buy_val[:-1]) - 1)) * 100
-            strategy_profit_per_trade = ((real_sell_val / real_buy_val[:-1]) - 1) * 100
+            self.strategy_profit_per_trade = ((real_sell_val / real_buy_val[:-1]) - 1) * 100
             self.accounting_value = ((self.data['Open'][-1] / real_buy_val[-1]) - 1) * 100
         self.perc_profit_bot = (self.strategy_profit + self.accounting_value)
         self.perc_profit_long = ((self.data['Open'][-1] / real_buy_val[0]) - 1) * 100

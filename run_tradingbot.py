@@ -1,8 +1,8 @@
 import yaml
 from tradingbot import TradingBot
-# import matplotlib
-#
-# matplotlib.rcParams['backend'] = 'TkAgg'
+import matplotlib
+matplotlib.rcParams['backend'] = 'TkAgg'
+matplotlib.rc('figure', figsize=(20,15))
 
 file_name = 'config.yaml'
 with open(file_name, 'r') as f:

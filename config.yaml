@@ -3,9 +3,9 @@ tradingbot_category: 'mean' # 'mean'
 save_outcome: True
 
 # ------------------------ data settings ------------------------------
-stock_name: 'DTE.DE' # [string] search for indicators at https://finance.yahoo.com/
-start_date: '2017-01-01' # [string] format yyyy-mm-dd
-end_date: '2022-09-22' # [string] format yyyy-mm-dd
+stock_name: 'EUNL.DE' # [string] search for indicators at https://finance.yahoo.com/
+start_date: '2016-01-01' # [string] format yyyy-mm-dd
+end_date: '2018-06-01' # [string] format yyyy-mm-dd
 frequency: '1d' # [string] 1d (daily) or 1m (minutely), minute data only available for 7 days
 window_len: 7 # [integer] window length in hours or days for sliding window calculation (depends on frequency value)
 # ---------------------------------------------------------------------
@@ -24,5 +24,5 @@ cost_trade_perc: 0.01 # [float or empty] cost per trade in percentage of trading
 # ------------------------ algorithm settings ------------------------------
 # Only for strategy_name: 'adapted_mean'
 average_type: 'moving_mean' # [string] 'moving_mean', 'absolut_mean'
-desired_win: 0.25 # [float] percentage win for one buy-sell trade
+desired_win: 1.5 # [float] percentage win for one buy-sell trade
 #------------------------------------------------------------------------
