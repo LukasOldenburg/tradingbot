@@ -14,9 +14,9 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         self.average_type = config['average_type']
         self.desired_win = config['desired_win']
         self.len_window_points = len_window_points
-        # todo debug order cost percentage
+
         self.order_cost_perc = self.cost_trade if self.cost_trade_measure == 'perc' \
-            else self.cost_trade / self.invested_money
+            else (self.cost_trade / self.invested_money) * 100
         self.band_values = None
 
     def trade(self):
@@ -45,6 +45,9 @@ class TestMovingAverage(strategy_handler.TestStrategy):
                         real_buy = buy_value * (1 + 0.5 * self.spread * 0.01 + self.order_cost_perc * 0.01)
                         self.real_buy_values = pd.concat([self.real_buy_values, real_buy])
                         buy_flag = True
+
+        if self.real_sell_values.empty:
+            raise ValueError('Found no point to sell.')
 
     def calc_bandwidth(self):
         # no band values before window movement
