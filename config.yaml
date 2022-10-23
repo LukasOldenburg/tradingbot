@@ -1,13 +1,13 @@
-tradingbot_name: 'moving_mean_1'
-tradingbot_category: 'mean' # 'mean'
-save_outcome: True
+tradingbot_name: 'moving_mean_1' # [string]
+tradingbot_category: 'mean' # [string] 'mean'
+save_outcome: True # [bool] saves results and plots in separate files
 
 # ------------------------ data settings ------------------------------
-stock_name: 'EUNL.DE' # [string] search for indicators at https://finance.yahoo.com/
-start_date: '2016-01-01' # [string] format yyyy-mm-dd
-end_date: '2018-06-01' # [string] format yyyy-mm-dd
+stock_name: 'BAS.DE' # [string] search for indicators at https://finance.yahoo.com/
+start_date: '2022-08-01' # [string] format yyyy-mm-dd
+end_date: '2022-09-15' # [string] format yyyy-mm-dd
 frequency: '1d' # [string] 1d (daily) or 1m (minutely), minute data only available for 7 days
-window_len: 7 # [integer] window length in hours or days for sliding window calculation (depends on frequency value)
+window_len: 2 # [integer] window length in hours or days for sliding window calculation (depends on frequency value)
 # ---------------------------------------------------------------------
 
 
@@ -22,7 +22,9 @@ cost_trade_perc: 0.01 # [float or empty] cost per trade in percentage of trading
 
 
 # ------------------------ algorithm settings ------------------------------
-# Only for strategy_name: 'adapted_mean'
+trailing_stop: {Activate: True, band: 0.1}  # [bool , float] order type is trailing stop with percentage band if Activate is True
+
+# Only for tradingbot_category: 'mean'
 average_type: 'moving_mean' # [string] 'moving_mean', 'absolut_mean'
-desired_win: 1.5 # [float] percentage win for one buy-sell trade
+desired_win: 1.0 # [float] percentage win for one buy-sell trade
 #------------------------------------------------------------------------

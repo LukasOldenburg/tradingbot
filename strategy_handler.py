@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 
 
 class TestStrategy:
@@ -13,6 +14,7 @@ class TestStrategy:
         self.tradingbot_name = config['tradingbot_name']
         self.save_outcome = config['save_outcome']
         self.spread = config['spread']
+        self.trailing_stop = config['trailing_stop']
         self.sell_values = pd.DataFrame()
         self.real_sell_values = pd.DataFrame()
         self.real_buy_values = pd.DataFrame()
@@ -50,7 +52,9 @@ class TestStrategy:
 
     def save_results(self):
         if self.save_results:
-            file = open("out_{}.txt".format(self.tradingbot_name), "w")
+            if not os.path.isdir(r'./{}'.format(self.tradingbot_name)):
+                os.makedirs(r'{}'.format(self.tradingbot_name))
+            file = open(r"./{}/out_{}.txt".format(self.tradingbot_name, self.tradingbot_name), "w")
             file.write('tradingbot_name: {}\n\nstart_date: {}\nend_date: {}\ntrading time: {}\ninvested_money: {}\n '
                        '\n\n##### BOT-STATS #####\nnum_trades: {}\nstrategy_profit [%]: {}\naccounting_value [%]: {}\n'
                        'perc_profit_bot: {}\n\n##### COMPARISON #####\nperc_profit_long: {}'
@@ -58,3 +62,7 @@ class TestStrategy:
                                self.data.index[-1] - self.data.index[0], self.invested_money, self.num_trades,
                                self.strategy_profit, self.accounting_value, self.perc_profit_bot, self.perc_profit_long))
             file.close()
+
+    def set_trailing_stop(self, value, band):
+        real_buy_value = 1
+        return real_buy_value

@@ -96,4 +96,4 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         ax.plot(self.sell_values, marker='.', markersize=20, markeredgecolor='g', markerfacecolor='g', alpha=.5,
                 linestyle='None', label='Sell Value (incl. Trading Cost & Spread)')
         ax.legend()
-        plt.savefig('plot_{}.svg'.format(self.tradingbot_name), format='svg')
+        plt.savefig(r'./{}/plot_{}.svg'.format(self.tradingbot_name, self.tradingbot_name), format='svg')
