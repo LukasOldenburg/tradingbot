@@ -64,7 +64,9 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         first_buy = None
         for i in range(self.len_window_points, len(self.data)):
             if self.data['Open'][i] < (
-                    self.data[self.average_type][i] - self.data['Open'][i] * self.desired_win * 0.01):
+                    self.data[self.average_type][i] - self.data['Open'][i] * 0.01 * (0.5 * self.desired_win
+                                                                                     + 0.5 * self.spread
+                                                                                     + 0.5 * self.order_cost_perc)):
                 first_buy = self.data.iloc[[i]]
                 return first_buy[['Open']], i
         if first_buy is None:
