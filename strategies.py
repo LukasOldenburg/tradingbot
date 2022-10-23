@@ -11,6 +11,7 @@ class TestMovingAverage(strategy_handler.TestStrategy):
 
     def __init__(self, config, data, len_window_points):
         super().__init__(data, config)
+        self.trailing_buy = pd.DataFrame()
         self.average_type = config['average_type']
         self.desired_win = config['desired_win']
         self.len_window_points = len_window_points
@@ -20,10 +21,15 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         self.band_values = None
 
     def trade(self):
+        # todo consistency check with plots
         # set initial conditions for first buy
         self.buy_values, buy_idx = self.find_first_buy()
-        real_first_buy = self.buy_values * (1 - 0.5 * self.spread * 0.01 - self.order_cost_perc * 0.01)
-        self.real_buy_values = pd.concat([self.real_buy_values, real_first_buy])
+        init_buy_value = self.buy_values
+        if self.trailing_stop['Activate']:
+            init_buy_value = self.buy_trailing_stop(timestep=buy_idx)
+            self.trailing_buy = pd.concat([self.trailing_buy, init_buy_value])
+        real_init_buy = init_buy_value * (1 - 0.5 * self.spread * 0.01 - self.order_cost_perc * 0.01)
+        self.real_buy_values = pd.concat([self.real_buy_values, real_init_buy])
         buy_flag = True  # True if last trade was buy
 
         # define band value range to ensure trade with desired win
@@ -35,6 +41,8 @@ class TestMovingAverage(strategy_handler.TestStrategy):
                     sell_value = self.check_sell(timestep=i, bandwidth=self.band_values[self.buy_values.index[-1]]) # refer to the last buy band value
                     if sell_value is not None:
                         self.sell_values = pd.concat([self.sell_values, sell_value])
+                        # if self.trailing_stop['Activate']:
+                        #     sell_value = self.sell_trailing_stop()
                         real_sell = sell_value * (1 - 0.5 * self.spread * 0.01 - self.order_cost_perc * 0.01)
                         self.real_sell_values = pd.concat([self.real_sell_values, real_sell])
                         buy_flag = False
@@ -42,6 +50,9 @@ class TestMovingAverage(strategy_handler.TestStrategy):
                     buy_value = self.check_buy(timestep=i, bandwidth=self.band_values[i])
                     if buy_value is not None:
                         self.buy_values = pd.concat([self.buy_values, buy_value])
+                        if self.trailing_stop['Activate']:
+                            buy_value = self.buy_trailing_stop(timestep=i)
+                            self.trailing_buy = pd.concat([self.trailing_buy, buy_value])
                         real_buy = buy_value * (1 + 0.5 * self.spread * 0.01 + self.order_cost_perc * 0.01)
                         self.real_buy_values = pd.concat([self.real_buy_values, real_buy])
                         buy_flag = True
@@ -50,6 +61,7 @@ class TestMovingAverage(strategy_handler.TestStrategy):
             raise ValueError('Found no point to sell.')
 
     def calc_bandwidth(self):
+        # todo trailing stop in band einbauen
         # no band values before window movement
         band_values = pd.DataFrame([np.nan] * (self.len_window_points - 1))
         band_values.index = self.data.index[:(self.len_window_points - 1)]
@@ -84,6 +96,22 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         else:
             return None
 
+    def buy_trailing_stop(self, timestep):
+        trigger_values = []
+        trigger = self.buy_values['Open'][[-1]] * (1 + self.trailing_stop['band'] * 0.01)
+        trigger_values.append(trigger.tolist())
+        mov_value = self.buy_values['Open'][-1]
+        while self.data['Open'][timestep] < trigger[0] and timestep < self.data['Open'].size - 2:
+            timestep = timestep + 1
+            trigger_values.append(trigger.tolist())
+            if self.data['Open'][timestep] < mov_value:
+                trigger = self.data['Open'][[timestep]] * (1 + self.trailing_stop['band'] * 0.01)
+                mov_value = self.data['Open'][timestep]
+        return self.data['Open'][[timestep + 1]].to_frame()
+
+    def sell_trailing_stop(self):
+
+        return 1
     def save_results(self):
         super().save_results()
 
@@ -94,8 +122,11 @@ class TestMovingAverage(strategy_handler.TestStrategy):
         ax.fill_between(self.data['moving_mean'].index, self.data['moving_mean'],
                         self.data['moving_mean'] - self.band_values, color='tab:orange', alpha=.5, label='Band')
         ax.plot(self.buy_values, marker='.', markersize=20, markeredgecolor='r', markerfacecolor='r', alpha=.5,
-                linestyle='None', label='Buy Value (incl. Trading Cost & Spread)')
+                linestyle='None', label='Buy Value (excl. Trading Cost & Spread)')
         ax.plot(self.sell_values, marker='.', markersize=20, markeredgecolor='g', markerfacecolor='g', alpha=.5,
-                linestyle='None', label='Sell Value (incl. Trading Cost & Spread)')
+                linestyle='None', label='Sell Value (excl. Trading Cost & Spread)')
+        if self.trailing_stop:
+            ax.plot(self.trailing_buy, marker='.', markersize=20, markeredgecolor='m', markerfacecolor='m', alpha=.5,
+                    linestyle='None', label='Buy Value (excl. Trading Cost & Spread after Trailing Stop)')
         ax.legend()
         plt.savefig(r'./{}/plot_{}.svg'.format(self.tradingbot_name, self.tradingbot_name), format='svg')
