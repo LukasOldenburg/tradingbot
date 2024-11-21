@@ -1,0 +1,24 @@
+name: gitleaks
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  scan:
+    name: Gitleaks Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensure full history is fetched for Gitleaks to scan all commits
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: "" # Optional: Path to a custom Gitleaks configuration file
+          additional-args: "--verbose" # Optional: Add any extra Gitleaks CLI arguments
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automatically injects the token
